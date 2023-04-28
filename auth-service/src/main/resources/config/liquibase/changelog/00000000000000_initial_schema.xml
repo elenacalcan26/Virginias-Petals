@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+
+    <!--
+        JHipster core tables.
+        The initial schema has the '00000000000001' id, so that it is over-written if we re-generate it.
+    -->
+    <changeSet id="20230327000000" author="CCUL">
+        <createTable tableName="user_poli">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="text">
+                <constraints unique="true" nullable="false" uniqueConstraintName="username_unique_constraint"/>
+            </column>
+            <column name="password" type="text"/>
+        </createTable>
+
+        <createTable tableName="role">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="user_role">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+
+        <addForeignKeyConstraint baseColumnNames="role_id"
+                                 baseTableName="user_role"
+                                 constraintName="fk_user_role_role_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="role"/>
+
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="user_role"
+                                 constraintName="fk_user_role_user_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="user_poli"/>
+
+
+        <createSequence sequenceName="user_sequence_generator" startValue="100000" incrementBy="1"/>
+        <createSequence sequenceName="role_sequence_generator" startValue="100000" incrementBy="1"/>
+        <createSequence sequenceName="user_role_sequence_generator" startValue="100000" incrementBy="1"/>
+
+    </changeSet>
+
+    <changeSet id="20230327000000-1" author="CCUL">
+        <loadData
+                file="../data/roles.csv"
+                separator=","
+                relativeToChangelogFile="true"
+                tableName="role">
+            <column name="id" type="numeric"/>
+            <column name="name" type="varchar"/>
+        </loadData>
+    </changeSet>
+
+</databaseChangeLog>
