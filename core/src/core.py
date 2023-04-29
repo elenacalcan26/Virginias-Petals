@@ -3,17 +3,18 @@ from http import HTTPStatus
 from utils import verify_request_body
 import json
 import psycopg2
+import os
 
 
 app = Flask(__name__)
 
 # TODO: replace fields with env variables (check values match docker compose)
 connection = psycopg2.connect(
-    host="postgres_container",
-    port=5432,
-    database="FlowerShopDB",
-    user="admin",
-    password="admin"
+    host=os.getenv("PGHOST"),
+    port=int(os.getenv("PGPORT")),
+    database=os.getenv("PGDATABASE"),
+    user=os.getenv("PGUSER"),
+    password=os.getenv("PGPASS")
 )
 
 
