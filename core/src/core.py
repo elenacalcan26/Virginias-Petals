@@ -28,17 +28,14 @@ def get_product(id):
     if product_row == None:
         return Response(status=HTTPStatus.NOT_FOUND)
 
-    cursor.execute(
-        f"SELECT company_name FROM vendor WHERE vendor_id = {product_row[1]}"
-    )
-    vendor_row = cursor.fetchone()
-
     product = {
-        "flower": product_row[3],
+        "product_id": product_row[0],
+        "vendor_id": product_row[1],
+        "product_category_id": product_row[2],
+        "product_name": product_row[3],
         "description": product_row[4],
         "price": product_row[5],
-        "availability": product_row[6],
-        "vendor": vendor_row[0],
+        "availability": product_row[6]
     }
 
     return json.dumps(product), HTTPStatus.OK
@@ -46,25 +43,60 @@ def get_product(id):
 
 @app.route("/core/products", methods=["GET"])
 def get_products():
+    product_category_id = request.args.get("product_category_id")
+    min_price = request.args.get("min_price")
+    max_price = request.args.get("max_price")
+    availability = request.args.get("availability")
+    vendor_id = request.args.get("vendor_id")
+    tag_ids = request.args.get("tag_ids")
+
+    query = "SELECT DISTINCT ON (product_id) * FROM product"
+    filters = []
+
+    if not product_category_id is None:
+        filters.append(f"product_category_id = {product_category_id}")
+
+    if not min_price is None:
+        filters.append(f"price >= {min_price}")
+
+    if not max_price is None:
+        filters.append(f"price <= {max_price}")
+
+    if not availability is None:
+        filters.append(f"availability = \'{availability}\'")
+
+    if not vendor_id is None:
+        filters.append(f"vendor_id = {vendor_id}")
+
+    if not tag_ids is None:
+        query += " NATURAL JOIN product_tag"
+        filters.append(f"tag_id IN ({tag_ids})")
+
+    if len(filters) > 0:
+        query += f" WHERE {filters[0]}"
+
+        for filter in filters[1:]:
+            query += f" AND {filter}"
+
     cursor = connection.cursor()
 
-    cursor.execute("SELECT * FROM product")
+    try:
+        cursor.execute(query)
+    except:
+        return Response(status=HTTPStatus.BAD_REQUEST)
+
     product_rows = cursor.fetchall()
 
     products = []
     for product_row in product_rows:
-        cursor.execute(
-            f"SELECT company_name FROM vendor WHERE vendor_id = {product_row[1]}"
-        )
-        vendor_row = cursor.fetchone()
-
         product = {
-            "id": product_row[0],
-            "flower": product_row[3],
+            "product_id": product_row[0],
+            "vendor_id": product_row[1],
+            "product_category_id": product_row[2],
+            "product_name": product_row[3],
             "description": product_row[4],
             "price": product_row[5],
-            "availability": product_row[6],
-            "vendor": vendor_row[0],
+            "availability": product_row[6]
         }
         products.append(product)
 
