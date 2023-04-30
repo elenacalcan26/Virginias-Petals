@@ -2,9 +2,10 @@ _format_version: "2.1"
 
 services:
   - name: auth-service
-    url: http://localhost:8081
+    url: http://auth-service:8081
     routes:
       - name: auth-service-route
         paths:
           - /auth/*
-
+        methods:
+          - POST

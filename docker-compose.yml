@@ -1,0 +1,115 @@
+version: "3.9"
+
+services:
+  flower-shop-db:
+    image: postgres:latest
+    container_name: flower-shop-db
+    restart: always
+    ports:
+      - 5433:5433
+    environment:
+      - POSTGRES_DB=FlowerShopDB
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - ./flower-shop-db/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+      - ./flower-shop-db/populate_db.sql:/docker-entrypoint-initdb.d/populate_db.sql
+    networks:
+      - core-shop-db-network
+      - db-gui-network
+    command: -p 5433
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    container_name: pgadmin
+    depends_on:
+      - flower-shop-db
+      - auth-db
+    ports:
+      - 5050:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    networks:
+      - db-gui-network
+
+  core-service:
+    image: core-service
+    container_name: core-service
+    build: ./core
+    restart: on-failure
+    ports:
+      - 7000:7000
+    depends_on:
+      - flower-shop-db
+    environment:
+      PGDATABASE: FlowerShopDB
+      PGUSER: admin
+      PGPASS: admin
+      PGHOST: flower-shop-db
+      PGPORT: 5433
+    networks:
+      - core-shop-db-network
+
+  auth-db:
+    image: postgres:latest
+    restart: always
+    container_name: auth-db
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: auth-db
+    volumes:
+      - auth-data:/var/lib/postgresql/data
+    networks:
+      - db-gui-network
+      - auth-network
+
+  auth-service:
+    image: auth-service
+    container_name: auth-service
+    restart: on-failure
+    build: ./auth-service
+    depends_on:
+      - auth-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://auth-db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+    networks:
+      - auth-network
+      - internal-gw
+
+  kong:
+    image: kong:latest
+    container_name: kong
+    environment:
+      KONG_DATABASE: 'off'
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001, 0.0.0.0:8444 ssl
+      KONG_DECLARATIVE_CONFIG: /usr/local/kong/declarative/kong.yml
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+    ports:
+      - "8080:8000"
+      - "8443:8443"
+      - "8001:8001"
+      - "8444:8444"
+    volumes:
+      - ./kong/kong.yml:/usr/local/kong/declarative/kong.yml
+    networks:
+      - internal-gw
+
+networks:
+  core-shop-db-network:
+  db-gui-network:
+  auth-network:
+  internal-gw:
+
+volumes:
+  auth-data:
