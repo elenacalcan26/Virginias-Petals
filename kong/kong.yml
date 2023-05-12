@@ -9,3 +9,4 @@ services:
           - /auth/*
         methods:
           - POST
+          - GET
