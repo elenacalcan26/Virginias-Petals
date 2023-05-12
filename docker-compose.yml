@@ -108,12 +108,25 @@ services:
     networks:
       - internal-gw
 
+  portainer:
+    image: portainer/portainer-ce
+    ports:
+      - 9000:9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - portainer_network
+    restart: always
+
 networks:
   core-shop-db-network:
   db-gui-network:
   auth-network:
   internal-gw:
   auth-core-network:
+  portainer_network:
 
 volumes:
   auth-data:
+  portainer_data:
