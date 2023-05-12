@@ -89,6 +89,10 @@ def get_products():
 
     products = []
     for product_row in product_rows:
+        cursor.execute(
+            f"SELECT tag_id FROM product_tag WHERE product_id = {product_row[0]}")
+        tag_ids = [tag_row[0] for tag_row in cursor]
+
         product = {
             "product_id": product_row[0],
             "vendor_id": product_row[1],
@@ -96,7 +100,8 @@ def get_products():
             "product_name": product_row[3],
             "description": product_row[4],
             "price": product_row[5],
-            "availability": product_row[6]
+            "availability": product_row[6],
+            "tag_ids": tag_ids
         }
         products.append(product)
 
@@ -131,7 +136,7 @@ def add_product():
 
     try:
         cursor.execute(
-            f"INSERT INTO product (vendor_id, product_category_id, product_name, description, price, availability) VALUES ({vendor_id}, {product_category_id}, '{product_name}', '{description}', {price}, '{availability}')"
+            f"INSERT INTO product (vendor_id, product_category_id, product_name, description, price, availability) VALUES ({vendor_id}, {product_category_id}, '{product_name}', '{description}', {price}, '{availability}') RETURNING product_id"
         )
     # treats unique key violation
     except psycopg2.errors.UniqueViolation:
@@ -142,9 +147,43 @@ def add_product():
         connection.rollback()
         return Response(status=HTTPStatus.BAD_REQUEST)
 
+    new_product = {
+        "product_id": cursor.fetchone()[0]
+    }
+
     connection.commit()
 
-    return Response(status=HTTPStatus.CREATED)
+    return json.dumps(new_product), HTTPStatus.CREATED
+
+
+@app.route("/core/product_tags", methods=["POST"])
+def add_product_tag():
+    body = request.get_json()
+
+    if not verify_request_body(
+        body,
+        [
+            "product_id",
+            "tag_ids"
+        ],
+    ):
+        return Response(status=HTTPStatus.BAD_REQUEST)
+
+    cursor = connection.cursor()
+
+    product_id = body["product_id"]
+
+    for tag_id in body["tag_ids"]:
+        try:
+            cursor.execute(
+                f"INSERT INTO product_tag VALUES ({product_id}, {tag_id})"
+            )
+        except:
+            return Response(HTTPStatus.BAD_REQUEST)
+
+    connection.commit()
+
+    return Response(HTTPStatus.CREATED)
 
 
 @app.route("/core/products/<int:id>", methods=["PUT"])
@@ -288,6 +327,29 @@ def add_vendor():
     connection.commit()
 
     return Response(status=HTTPStatus.CREATED)
+
+
+@app.route("/core/vendors", methods=["GET"])
+def get_vendor_by_email():
+    vendor_email = request.args.get("username")
+
+    if vendor_email is None:
+        return Response(status=HTTPStatus.BAD_REQUEST)
+
+    cursor = connection.cursor()
+
+    cursor.execute(f"SELECT * FROM vendor WHERE email = '{vendor_email}'")
+    vendor_row = cursor.fetchone()
+
+    # verifies the given vendor exists
+    if vendor_row == None:
+        return Response(status=HTTPStatus.NOT_FOUND)
+
+    vendor = {
+        "vendor_id": vendor_row[0]
+    }
+
+    return json.dumps(vendor), HTTPStatus.OK
 
 
 if __name__ == "__main__":
