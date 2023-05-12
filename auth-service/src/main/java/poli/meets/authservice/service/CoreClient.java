@@ -13,7 +13,7 @@ public class CoreClient {
 
     private final RestTemplate restTemplate;
 
-    private static final String CORE_URL = "http://localhost:7000/core";
+    private static final String CORE_URL = "http://core-service:7000/core";
 
     public CoreClient() {
         this.restTemplate = new RestTemplate();

@@ -14,6 +14,7 @@ services:
     volumes:
       - ./flower-shop-db/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
       - ./flower-shop-db/populate_db.sql:/docker-entrypoint-initdb.d/populate_db.sql
+      - ./data/core-data:/var/lib/postgresql/data
     networks:
       - core-shop-db-network
       - db-gui-network
@@ -50,6 +51,7 @@ services:
       PGHOST: flower-shop-db
       PGPORT: 5433
     networks:
+      - auth-core-network
       - core-shop-db-network
 
   auth-db:
@@ -63,7 +65,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_DB: auth-db
     volumes:
-      - auth-data:/var/lib/postgresql/data
+      - ./data/auth-data:/var/lib/postgresql/data
     networks:
       - db-gui-network
       - auth-network
@@ -81,6 +83,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
     networks:
+      - auth-core-network
       - auth-network
       - internal-gw
 
@@ -110,6 +113,7 @@ networks:
   db-gui-network:
   auth-network:
   internal-gw:
+  auth-core-network:
 
 volumes:
   auth-data:
