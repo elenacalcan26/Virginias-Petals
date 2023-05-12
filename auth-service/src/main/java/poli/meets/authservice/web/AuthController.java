@@ -6,15 +6,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import poli.meets.authservice.model.User;
-import poli.meets.authservice.security.JwtTokenUtil;
 import poli.meets.authservice.security.dtos.LoginRequest;
-import poli.meets.authservice.security.dtos.LoginResponse;
-import poli.meets.authservice.service.UserService;
 import poli.meets.authservice.service.UserUtilsService;
-import poli.meets.authservice.service.dtos.UserRegisterDTO;
+import poli.meets.authservice.service.dtos.CustomerRegisterDTO;
+import poli.meets.authservice.service.dtos.UserDTO;;
+import poli.meets.authservice.service.dtos.VendorRegisterDTO;
 
 @RestController
 @RequestMapping("/api")
@@ -37,14 +35,29 @@ public class AuthController {
         return ResponseEntity.ok(userUtilsService.login(loginRequest));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserRegisterDTO user) {
+    @PostMapping("/register-customer")
+    public ResponseEntity<?> registerCustomer(@RequestBody CustomerRegisterDTO user) {
         try {
-            User savedUser = userUtilsService.register(user);
+            User savedUser = userUtilsService.registerCustomer(user);
             return ResponseEntity.ok(savedUser);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+
+    @PostMapping("/register-vendor")
+    public ResponseEntity<?> registerVendor(@RequestBody VendorRegisterDTO user) {
+        try {
+            User savedUser = userUtilsService.registerVendor(user);
+            return ResponseEntity.ok(savedUser);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/current-user")
+    public ResponseEntity<UserDTO> getCurrentUser(@RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(userUtilsService.getCurrentUser(token.substring(7)));
     }
 
 }
