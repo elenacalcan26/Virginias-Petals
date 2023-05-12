@@ -8,7 +8,6 @@ import os
 
 app = Flask(__name__)
 
-# TODO: replace fields with env variables (check values match docker compose)
 connection = psycopg2.connect(
     host=os.getenv("PGHOST"),
     port=int(os.getenv("PGPORT")),
@@ -212,6 +211,84 @@ def delete_product(id):
 
     return Response(status=HTTPStatus.OK)
 
-# TODO: check port is correct
+
+@app.route("/core/customers", methods=["POST"])
+def add_customer():
+    body = request.get_json()
+
+    if not verify_request_body(
+        body,
+        [
+            "email",
+            "firstName",
+            "lastName"
+        ],
+    ):
+        return Response(status=HTTPStatus.BAD_REQUEST)
+
+    email = body["email"]
+    first_name = body["firstName"]
+    last_name = body["lastName"]
+
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(
+            f"INSERT INTO customer (email, first_name, last_name) VALUES ('{email}', '{first_name}', '{last_name}')"
+        )
+    # treats unique key violation
+    except psycopg2.errors.UniqueViolation:
+        connection.rollback()
+        return Response(status=HTTPStatus.CONFLICT)
+    # treats any other error
+    except:
+        connection.rollback()
+        return Response(status=HTTPStatus.BAD_REQUEST)
+
+    connection.commit()
+
+    return Response(status=HTTPStatus.CREATED)
+
+
+@app.route("/core/vendors", methods=["POST"])
+def add_vendor():
+    body = request.get_json()
+
+    if not verify_request_body(
+        body,
+        [
+            "email",
+            "companyName",
+            "companyAddress",
+            "bankAccount"
+        ],
+    ):
+        return Response(status=HTTPStatus.BAD_REQUEST)
+
+    email = body["email"]
+    company_name = body["companyName"]
+    company_address = body["companyAddress"]
+    bank_account = body["bankAccount"]
+
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(
+            f"INSERT INTO vendor (email, company_name, company_address, bank_account) VALUES ('{email}', '{company_name}', '{company_address}', '{bank_account}')"
+        )
+    # treats unique key violation
+    except psycopg2.errors.UniqueViolation:
+        connection.rollback()
+        return Response(status=HTTPStatus.CONFLICT)
+    # treats any other error
+    except:
+        connection.rollback()
+        return Response(status=HTTPStatus.BAD_REQUEST)
+
+    connection.commit()
+
+    return Response(status=HTTPStatus.CREATED)
+
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=7000)
