@@ -53,6 +53,18 @@ services:
     networks:
       - auth-core-network
       - core-shop-db-network
+      - core-business-network
+
+  business-logic-service:
+    image: business-logic-service
+    container_name: business-logic-service
+    build: ./business-logic-service
+    restart: on-failure
+    ports:
+      - 8000:8000
+    networks:
+      - auth-business-network
+      - core-business-network
 
   auth-db:
     image: postgres:latest
@@ -83,6 +95,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
     networks:
+      - auth-business-network
       - auth-core-network
       - auth-network
       - internal-gw
@@ -114,6 +127,8 @@ networks:
   auth-network:
   internal-gw:
   auth-core-network:
+  auth-business-network:
+  core-business-network:
 
 volumes:
   auth-data:
