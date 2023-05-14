@@ -113,14 +113,14 @@ VALUES
 
 
 INSERT INTO cart
-    (customer_id, total_price)
+    (customer_id, total_price, status)
 VALUES
-    (1, 3214),
-    (2, 3447),
-    (3, 9895),
-    (4, 7620),
-    (5, 1014),
-    (1, 0);
+    (1, 3214, 'old'),
+    (2, 3447, 'current'),
+    (3, 9895, 'current'),
+    (4, 7620, 'current'),
+    (5, 1014, 'current'),
+    (1, 0, 'current');
 
 INSERT INTO cart_product
     (cart_id, product_id, quantity)
