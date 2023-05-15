@@ -19,3 +19,4 @@ services:
         methods:
           - POST
           - GET
+          - DELETE
