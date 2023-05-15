@@ -71,6 +71,7 @@ services:
     networks:
       - auth-business-network
       - core-business-network
+      - internal-gw
     deploy:
       replicas: 3
       placement:
