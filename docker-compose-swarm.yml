@@ -71,6 +71,7 @@ services:
     networks:
       - auth-business-network
       - core-business-network
+      - internal-gw
     deploy:
       replicas: 3
       placement:
@@ -148,6 +149,40 @@ services:
       - ./kong/kong.yml:/usr/local/kong/declarative/kong.yml
     networks:
       - internal-gw
+    deploy:
+      placement:
+        constraints:
+          - "node.role==manager"
+      restart_policy:
+        condition: on-failure
+
+  agent:
+    image: portainer/agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    networks:
+      - agent_network
+    deploy:
+      mode: global
+      placement:
+        constraints: [ node.platform.os == linux ]
+
+  portainer:
+    image: portainer/portainer-ce
+    command: -H tcp://tasks.agent:9001 --tlsskipverify
+    ports:
+      - "9443:9443"
+      - "9000:9000"
+    volumes:
+      - portainer_data:/data
+    networks:
+      - agent_network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [ node.role == manager ]
 
 networks:
   core-db-network:
@@ -157,8 +192,12 @@ networks:
   auth-core-network:
   auth-business-network:
   core-business-network:
+  agent_network:
+    driver: overlay
+    attachable: true
 
 
 volumes:
   auth-data:
   flower-shop-data:
+  portainer_data:
