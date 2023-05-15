@@ -8,7 +8,7 @@ from datetime import date
 app = Flask(__name__)
 
 
-@app.route("/business-logic/api/products", methods=["POST"])
+@app.route("/api/products", methods=["POST"])
 def post_product():
     """
         Posts a new product. Action permitted only to vendor users.
@@ -72,7 +72,7 @@ def post_product():
     return Response(status=added_product_response.status_code)
 
 
-@app.route("/business-logic/api/products/me", methods=["GET"])
+@app.route("/api/products/me", methods=["GET"])
 def get_vendor_products():
     """
         Returns all products posted by the current user. Action permitted only to vendor users.
@@ -110,7 +110,7 @@ def get_vendor_products():
     return json.dumps(current_vendor_products.json()), HTTPStatus.OK
 
 
-@app.route("/business-logic/api/products/<int:id>", methods=["DELETE"])
+@app.route("/api/products/<int:id>", methods=["DELETE"])
 def delete_product(id):
     """
         Deletes a posted product. Action permitted only to vendor users.
@@ -157,7 +157,7 @@ def delete_product(id):
     return Response(status=deleted_product_response.status_code)
 
 
-@app.route("/business-logic/api/products", methods=["GET"])
+@app.route("/api/products", methods=["GET"])
 def get_products():
     """
         Returns all posted products. Action permitted to all users.
@@ -190,7 +190,7 @@ def get_products():
     return json.dumps(products.json()), HTTPStatus.OK
 
 
-@app.route("/business-logic/api/products/<int:id>", methods=["GET"])
+@app.route("/api/products/<int:id>", methods=["GET"])
 def get_product(id):
     """
         Returns one posted product. Action permitted to all users.
@@ -215,7 +215,7 @@ def get_product(id):
     return json.dumps(product.json()), HTTPStatus.OK
 
 
-@app.route("/business-logic/api/cart-products", methods=["POST"])
+@app.route("/api/cart-products", methods=["POST"])
 def add_cart_product():
     """
         Adds a product to customer cart. Action permitted only to customer users.
@@ -283,7 +283,7 @@ def add_cart_product():
     return Response(status=added_cart_product_response.status_code)
 
 
-@app.route("/business-logic/api/cart-products/<int:id>", methods=["DELETE"])
+@app.route("/api/cart-products/<int:id>", methods=["DELETE"])
 def delete_cart_product(id):
     """
         Deletes a product from user cart. Action permitted only to customer users.
@@ -327,7 +327,7 @@ def delete_cart_product(id):
     return Response(status=deleted_cart_product_response.status_code)
 
 
-@app.route("/business-logic/api/carts", methods=["GET"])
+@app.route("/api/carts", methods=["GET"])
 def get_cart():
     """
         Returns products from user cart. Action permitted only to customer users.
@@ -382,7 +382,7 @@ def get_cart():
     return json.dumps(cart_response), HTTPStatus.OK
 
 
-@app.route("/business-logic/api/orders", methods=["POST"])
+@app.route("/api/orders", methods=["POST"])
 def add_order():
     """
         Orders the items found in the current user cart. Action permitted only to customer users.

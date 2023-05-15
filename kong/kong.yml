@@ -10,3 +10,13 @@ services:
         methods:
           - POST
           - GET
+  - name: business-logic-service
+    url: http://business-logic-service:8000
+    routes:
+      - name: business-logic-route
+        paths:
+          - /business-logic/*
+        methods:
+          - POST
+          - GET
+          - DELETE
