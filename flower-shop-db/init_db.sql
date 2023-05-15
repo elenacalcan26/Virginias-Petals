@@ -60,6 +60,8 @@ CREATE TABLE cart
     cart_id SERIAL,
     customer_id INT NOT NULL,
     total_price INT DEFAULT 0,
+    status VARCHAR(10) DEFAULT 'current' CHECK (status IN
+    ('current', 'old')),
     CONSTRAINT PK_CART PRIMARY KEY (cart_id),
     CONSTRAINT FK_CART_CUSTOMER FOREIGN KEY (customer_id) REFERENCES customer (customer_id) ON DELETE CASCADE
 );
