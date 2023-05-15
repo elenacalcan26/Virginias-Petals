@@ -1,0 +1,164 @@
+version: "3.9"
+
+services:
+  flower-shop-db:
+    image: postgres:latest
+    ports:
+      - 5433:5433
+    environment:
+      - POSTGRES_DB=FlowerShopDB
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - ./flower-shop-db/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+      - ./flower-shop-db/populate_db.sql:/docker-entrypoint-initdb.d/populate_db.sql
+      - flower-shop-data:/var/lib/postgresql/data
+    networks:
+      - core-db-network
+      - db-gui-network
+    command: -p 5433
+    deploy:
+      placement:
+        constraints:
+          - "node.role==manager"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - flower-shop-db
+      - auth-db
+    ports:
+      - 5050:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    networks:
+      - db-gui-network
+
+  core-service:
+    image: elenac1999/virginia-core
+    ports:
+      - 7000:7000
+    depends_on:
+      - flower-shop-db
+    environment:
+      PGDATABASE: FlowerShopDB
+      PGUSER: admin
+      PGPASS: admin
+      PGHOST: flower-shop-db
+      PGPORT: 5433
+    networks:
+      - auth-core-network
+      - core-db-network
+      - core-business-network
+    deploy:
+      replicas: 3
+      placement:
+        max_replicas_per_node: 2
+      update_config:
+        parallelism: 2
+        order: start-first
+      rollback_config:
+        parallelism: 2
+        order: stop-first
+      restart_policy:
+        condition: on-failure
+
+  business-logic-service:
+    image: elenac1999/virginia-business-logic-service
+    ports:
+      - 8000:8000
+    networks:
+      - auth-business-network
+      - core-business-network
+    deploy:
+      replicas: 3
+      placement:
+        max_replicas_per_node: 2
+      update_config:
+        parallelism: 2
+        order: start-first
+      rollback_config:
+        parallelism: 2
+        order: stop-first
+      restart_policy:
+        condition: on-failure
+
+  auth-db:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: auth-db
+    volumes:
+      - auth-data:/var/lib/postgresql/data
+    networks:
+      - db-gui-network
+      - auth-network
+    deploy:
+      placement:
+        constraints:
+          - "node.role==manager"
+
+  auth-service:
+    image: elenac1999/virginia-auth-service
+    depends_on:
+      - auth-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://auth-db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+    networks:
+      - auth-business-network
+      - auth-core-network
+      - auth-network
+      - internal-gw
+    deploy:
+      replicas: 3
+      placement:
+        max_replicas_per_node: 2
+      update_config:
+        parallelism: 2
+        order: start-first
+      rollback_config:
+        parallelism: 2
+        order: stop-first
+      restart_policy:
+        condition: on-failure
+
+  kong:
+    image: kong:latest
+    environment:
+      KONG_DATABASE: 'off'
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001, 0.0.0.0:8444 ssl
+      KONG_DECLARATIVE_CONFIG: /usr/local/kong/declarative/kong.yml
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+    ports:
+      - "8080:8000"
+      - "8443:8443"
+      - "8001:8001"
+      - "8444:8444"
+    volumes:
+      - ./kong/kong.yml:/usr/local/kong/declarative/kong.yml
+    networks:
+      - internal-gw
+
+networks:
+  core-db-network:
+  db-gui-network:
+  auth-network:
+  internal-gw:
+  auth-core-network:
+  auth-business-network:
+  core-business-network:
+
+
+volumes:
+  auth-data:
+  flower-shop-data:
