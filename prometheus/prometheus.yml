@@ -23,3 +23,8 @@ scrape_configs:
         - filefd
         - filesystem
         - xfs
+
+  - job_name: 'kong'
+    static_configs:
+      - targets: ['kong:8001']
+    scrape_interval: 10s

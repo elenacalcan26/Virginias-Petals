@@ -149,6 +149,7 @@ services:
       - ./root/kong/kong.yml:/usr/local/kong/declarative/kong.yml
     networks:
       - internal-gw
+      - kong_monitoring
     deploy:
       placement:
         constraints:
@@ -164,6 +165,7 @@ services:
       - 9090:9090
     networks:
       - monitoring
+      - kong_monitoring
 
   node_exporter:
     image: prom/node-exporter
@@ -192,6 +194,7 @@ networks:
   auth-business-network:
   core-business-network:
   monitoring:
+  kong_monitoring:
 
 
 volumes:
