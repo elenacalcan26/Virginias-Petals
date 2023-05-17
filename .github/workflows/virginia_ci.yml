@@ -1,4 +1,4 @@
-name: Virginias Petals CI
+name: Virginias Petals CI/CD
 
 on:
   push:
@@ -36,3 +36,21 @@ jobs:
             done
             cd ..
           done
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    env:
+      MASTER_IP: ip172-18-0-90-chicu6o1k7jg00amallg@direct.labs.play-with-docker.com
+      WEBHOOK: http://ip172-18-0-90-chicu6o1k7jg00amallg-9000.direct.labs.play-with-docker.com/api/stacks/webhooks/536e2cce-b284-454b-b009-0159b3287ec4
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install & update cURL
+        run: sudo apt-get update && sudo apt-get -y install curl
+
+      - name: Deploy to Play With Docker
+        run: curl -X POST ${{ env.WEBHOOK }}
