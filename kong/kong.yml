@@ -20,3 +20,6 @@ services:
           - POST
           - GET
           - DELETE
+
+plugins:
+  - name: prometheus
