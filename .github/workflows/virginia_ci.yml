@@ -42,8 +42,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      MASTER_IP: ip172-18-0-52-chijfcie69v000am3te0@direct.labs.play-with-docker.com
-      WEBHOOK: http://ip172-18-0-52-chijfcie69v000am3te0-9000.direct.labs.play-with-docker.com/api/stacks/webhooks/d6ece0a5-85ec-4424-9658-e13903832863
+      MASTER_IP: ip172-18-1-28-chj7cgie69v000am72v0@direct.labs.play-with-docker.com
+      WEBHOOK: http://ip172-18-1-28-chj7cgie69v000am72v0-9000.direct.labs.play-with-docker.com/api/stacks/webhooks/37f0ef55-95cb-4667-8f99-e51cab263362
 
     steps:
       - name: Checkout
