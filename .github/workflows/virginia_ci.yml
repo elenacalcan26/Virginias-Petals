@@ -43,7 +43,7 @@ jobs:
 
     env:
       MASTER_IP: ip172-18-1-28-chj7cgie69v000am72v0@direct.labs.play-with-docker.com
-      WEBHOOK: http://ip172-18-1-28-chj7cgie69v000am72v0-9000.direct.labs.play-with-docker.com/api/stacks/webhooks/37f0ef55-95cb-4667-8f99-e51cab263362
+      WEBHOOK: http://ip172-18-0-5-chktgg09ec4g0083jd0g-9000.direct.labs.play-with-docker.com/api/stacks/webhooks/2697dde8-9b14-4ad6-a820-72bbf4fab84f
 
     steps:
       - name: Checkout
