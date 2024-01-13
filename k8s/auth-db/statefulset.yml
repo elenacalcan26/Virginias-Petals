@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: auth-db-statefulset
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-db
+  serviceName: auth-db-service
+  template:
+    metadata:
+      labels:
+        app: auth-db
+    spec:
+      containers:
+        - name: auth-db
+          image: postgres:latest
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-db-configmap
+                  key: postgres_password
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-db-configmap
+                  key: postgres_user
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: auth-db-configmap
+                  key: postgres_db
+          volumeMounts:
+            - name: auth-db-data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: auth-db-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

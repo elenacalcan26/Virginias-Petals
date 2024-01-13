@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core-deployment
+  labels:
+    app: core
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: core
+  template:
+    metadata:
+      labels:
+        app: core
+    spec:
+      containers:
+        - name: core
+          image: elenac1999/virginia-core
+          ports:
+            - containerPort: 7000
+          env:
+            - name: PGDATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: flower-shop-db-configmap
+                  key: postgres_db
+            - name: PGUSER
+              valueFrom:
+                configMapKeyRef:
+                  name: flower-shop-db-configmap
+                  key: postgres_user
+            - name: PGPASS
+              valueFrom:
+                configMapKeyRef:
+                  name: flower-shop-db-configmap
+                  key: postgres_password
+            - name: PGHOST
+              valueFrom:
+                configMapKeyRef:
+                  name: core-configmap
+                  key: db_url
+            - name: PGPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: core-configmap
+                  key: db_port

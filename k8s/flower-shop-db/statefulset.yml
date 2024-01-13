@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: flower-shop-db-statefulset
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flower-shop-db
+  serviceName: flower-shop-db-service
+  template:
+    metadata:
+      labels:
+        app: flower-shop-db
+    spec:
+      containers:
+        - name: flower-shop-db
+          image: elenac1999/virginia-flower-shop-db
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: flower-shop-db-configmap
+                  key: postgres_db
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: flower-shop-db-configmap
+                  key: postgres_user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: flower-shop-db-configmap
+                  key: postgres_password
+          volumeMounts:
+            - name: flower-shop-db-data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: flower-shop-db-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

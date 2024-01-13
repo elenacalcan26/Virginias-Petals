@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-configmap
+data:
+  spring_datasource_url: jdbc:postgresql://auth-db-service:5432/auth-db
+  spring_jpa_hibernate_auto: none

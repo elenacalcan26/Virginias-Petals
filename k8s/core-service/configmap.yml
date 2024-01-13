@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: core-configmap
+data:
+  db_url: flower-shop-db-service
+  db_port: "5432"
