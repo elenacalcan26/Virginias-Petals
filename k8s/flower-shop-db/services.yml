@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: flower-shop-db-service
+spec:
+  selector:
+    app: flower-shop-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgadmin-configmap
+data:
+  pgadmin_default_email: admin@admin.com
+  pgadmin_default_password: admin

@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: business-logic-deployment
+  labels:
+    app: business-logic
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: business-logic
+  template:
+    metadata:
+      labels:
+        app: business-logic
+    spec:
+      containers:
+        - name: business-logic
+          image: elenac1999/virginia-business-logic-service
+          ports:
+            - containerPort: 8000

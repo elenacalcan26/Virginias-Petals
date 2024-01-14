@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flower-shop-db-configmap
+data:
+  postgres_db: FlowerShopDB
+  postgres_user: admin
+  postgres_password: admin
